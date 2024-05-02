@@ -88,7 +88,12 @@ pub fn encode_sample(
 
     temporary::add(&dest, TempKind::Keepable);
 
-    let vf = input_vfilter.and_then(|s1| vfilter.map(|s2| format!("{},{}", s1, s2)));
+    let vf = match (input_vfilter, vfilter) {
+        (Some(s1), Some(s2)) => Some(format!("{},{}", s1, s2)),
+        (Some(s1), None) => Some(format!("{}", s1)),
+        (None, Some(s2)) => Some(format!("{}", s2)),
+        (None, None) => None,
+    }
 
     if pix_fmt == PixelFormat::None {
         let enc = Command::new("ffmpeg")
@@ -176,7 +181,12 @@ pub fn encode(
         false => "0",
     };
 
-    let vf = input_vfilter.and_then(|s1| vfilter.map(|s2| format!("{},{}", s1, s2)));
+    let vf = match (input_vfilter, vfilter) {
+        (Some(s1), Some(s2)) => Some(format!("{},{}", s1, s2)),
+        (Some(s1), None) => Some(format!("{}", s1)),
+        (None, Some(s2)) => Some(format!("{}", s2)),
+        (None, None) => None,
+    }
 
     if pix_fmt == PixelFormat::None {
         let enc = Command::new("ffmpeg")
