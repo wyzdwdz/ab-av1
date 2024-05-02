@@ -446,7 +446,7 @@ pub enum PixelFormat {
     Yuv420p,
     Yuv420p10le,
     Yuv444p10le,
-    DrmPrime
+    DrmPrime,
 }
 
 #[test]
