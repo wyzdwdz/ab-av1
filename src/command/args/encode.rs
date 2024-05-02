@@ -31,7 +31,7 @@ pub struct Encode {
     /// E.g. --input-vfilter "scale=1280:-1,fps=24".
     ///
     /// See https://ffmpeg.org/ffmpeg-filters.html#Video-Filters
-    #[arg(long)]
+    #[arg(long = "input-vfilter")]
     pub input_vfilter: Option<String>,
 
     /// Ffmpeg video filter applied to the input before av1 encoding.
@@ -164,7 +164,7 @@ impl Encode {
             write!(hint, " --pix-format {pix_fmt}").unwrap();
         }
         if let Some(input_vfilter) = input_vfilter {
-            write!(hint, " --input_vfilter {input_vfilter:?}").unwrap();
+            write!(hint, " --input-vfilter {input_vfilter:?}").unwrap();
         }
         if let Some(filter) = vfilter {
             write!(hint, " --vfilter {filter:?}").unwrap();
