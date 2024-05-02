@@ -43,9 +43,13 @@ impl Vmaf {
     pub fn ffmpeg_lavfi(
         &self,
         distorted_res: Option<(u32, u32)>,
-        pix_fmt: PixelFormat,
+        pix_fmt: mut PixelFormat,
         ref_vfilter: Option<&str>,
     ) -> String {
+        if pix_fmt == PixelFormat::DrmPrime {
+            pix_fmt = PixelFormat::Yuv444p10le;
+        }
+        
         let mut args = self.vmaf_args.clone();
         if !args.iter().any(|a| a.contains("n_threads")) {
             // default n_threads to all cores
