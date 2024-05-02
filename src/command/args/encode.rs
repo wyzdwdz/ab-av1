@@ -462,7 +462,7 @@ impl PixelFormat {
             Self::Yuv420p10le => "yuv420p10le",
             Self::Yuv444p10le => "yuv444p10le",
             Self::Yuv420p => "yuv420p",
-            Self::DrmPrime => "drm_prime"
+            Self::DrmPrime => "drm_prime",
         }
     }
 }
