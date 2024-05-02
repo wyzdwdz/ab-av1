@@ -27,13 +27,15 @@ pub struct Encode {
     pub input: PathBuf,
 
     /// Ffmpeg video filter applied to the input before av1 encoding.
-    /// E.g. --input_vfilter "scale=1280:-1,fps=24".
+    /// Caution! This filter will not be applied in VMAF.
+    /// E.g. --input-vfilter "scale=1280:-1,fps=24".
     ///
     /// See https://ffmpeg.org/ffmpeg-filters.html#Video-Filters
     #[arg(long)]
     pub input_vfilter: Option<String>,
 
     /// Ffmpeg video filter applied to the input before av1 encoding.
+    /// Caution! This filter will be applied in VMAF.
     /// E.g. --vfilter "scale=1280:-1,fps=24".
     ///
     /// See https://ffmpeg.org/ffmpeg-filters.html#Video-Filters
