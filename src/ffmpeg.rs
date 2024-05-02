@@ -206,7 +206,9 @@ impl VCodecSpecific for Arc<str> {
         } else if self.ends_with("_nvenc") {
             "-cq"
         } else if self.ends_with("_qsv") {
-            "-global_quality"
+            "-global_quality" 
+        } else if self.ends_with("_rkmpp") {
+            "-qp_init"
         } else {
             "-crf"
         }
