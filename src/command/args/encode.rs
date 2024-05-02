@@ -481,7 +481,7 @@ impl TryFrom<&str> for PixelFormat {
             "yuv420p10le" => Ok(Self::Yuv420p10le),
             "yuv444p10le" => Ok(Self::Yuv444p10le),
             "yuv420p" => Ok(Self::Yuv420p),
-            "drm_prime" => Ok(Self::DrmPrime)
+            "drm_prime" => Ok(Self::DrmPrime),
             _ => Err(()),
         }
     }
