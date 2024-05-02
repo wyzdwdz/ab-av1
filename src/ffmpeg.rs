@@ -21,6 +21,7 @@ use tokio_stream::Stream;
 pub struct FfmpegEncodeArgs<'a> {
     pub input: &'a Path,
     pub vcodec: Arc<str>,
+    pub input_vfilter: Option<&'a str>,
     pub vfilter: Option<&'a str>,
     pub pix_fmt: PixelFormat,
     pub crf: f32,
@@ -48,6 +49,7 @@ impl FfmpegEncodeArgs<'_> {
 
         // input not relevant to sample encoding
         self.vcodec.hash(state);
+        self.input_vfilter.hash(state);
         self.vfilter.hash(state);
         self.pix_fmt.hash(state);
         self.crf.to_bits().hash(state);
@@ -62,6 +64,7 @@ pub fn encode_sample(
     FfmpegEncodeArgs {
         input,
         vcodec,
+        input_vfilter,
         vfilter,
         pix_fmt,
         crf,
@@ -85,6 +88,8 @@ pub fn encode_sample(
 
     temporary::add(&dest, TempKind::Keepable);
 
+    let vf = input_vfilter.and_then(|s1| vfilter.map(|s2| format!("{},{}", s1, s2)));
+
     if pix_fmt == PixelFormat::None {
         let enc = Command::new("ffmpeg")
             .kill_on_drop(true)
@@ -95,7 +100,7 @@ pub fn encode_sample(
             .args(output_args.iter().map(|a| &**a))
             .arg2(vcodec.crf_arg(), crf)
             .arg2_opt(vcodec.preset_arg(), preset)
-            .arg2_opt("-vf", vfilter)
+            .arg2_opt("-vf", vf)
             .arg("-an")
             .arg(&dest)
             .stdin(Stdio::null())
@@ -118,7 +123,7 @@ pub fn encode_sample(
             .arg2(vcodec.crf_arg(), crf)
             .arg2("-pix_fmt", pix_fmt.as_str())
             .arg2_opt(vcodec.preset_arg(), preset)
-            .arg2_opt("-vf", vfilter)
+            .arg2_opt("-vf", vf)
             .arg("-an")
             .arg(&dest)
             .stdin(Stdio::null())
@@ -137,6 +142,7 @@ pub fn encode(
     FfmpegEncodeArgs {
         input,
         vcodec,
+        input_vfilter,
         vfilter,
         pix_fmt,
         crf,
@@ -170,6 +176,8 @@ pub fn encode(
         false => "0",
     };
 
+    let vf = input_vfilter.and_then(|s1| vfilter.map(|s2| format!("{},{}", s1, s2)));
+
     if pix_fmt == PixelFormat::None {
         let enc = Command::new("ffmpeg")
             .kill_on_drop(true)
@@ -182,7 +190,7 @@ pub fn encode(
             .args(output_args.iter().map(|a| &**a))
             .arg2(vcodec.crf_arg(), crf)
             .arg2_opt(vcodec.preset_arg(), preset)
-            .arg2_opt("-vf", vfilter)
+            .arg2_opt("-vf", vf)
             .arg2("-c:s", "copy")
             .arg2("-c:a", audio_codec)
             .arg2_if(downmix_to_stereo, "-ac", 2)
@@ -211,7 +219,7 @@ pub fn encode(
             .arg2(vcodec.crf_arg(), crf)
             .arg2("-pix_fmt", pix_fmt.as_str())
             .arg2_opt(vcodec.preset_arg(), preset)
-            .arg2_opt("-vf", vfilter)
+            .arg2_opt("-vf", vf)
             .arg2("-c:s", "copy")
             .arg2("-c:a", audio_codec)
             .arg2_if(downmix_to_stereo, "-ac", 2)

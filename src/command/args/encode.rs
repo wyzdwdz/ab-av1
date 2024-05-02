@@ -27,6 +27,13 @@ pub struct Encode {
     pub input: PathBuf,
 
     /// Ffmpeg video filter applied to the input before av1 encoding.
+    /// E.g. --input_vfilter "scale=1280:-1,fps=24".
+    ///
+    /// See https://ffmpeg.org/ffmpeg-filters.html#Video-Filters
+    #[arg(long)]
+    pub input_vfilter: Option<String>,
+
+    /// Ffmpeg video filter applied to the input before av1 encoding.
     /// E.g. --vfilter "scale=1280:-1,fps=24".
     ///
     /// See https://ffmpeg.org/ffmpeg-filters.html#Video-Filters
@@ -121,6 +128,7 @@ impl Encode {
         let Self {
             encoder,
             input,
+            input_vfilter,
             vfilter,
             preset,
             pix_format,
@@ -152,6 +160,9 @@ impl Encode {
         }
         if let Some(pix_fmt) = pix_format {
             write!(hint, " --pix-format {pix_fmt}").unwrap();
+        }
+        if let Some(input_vfilter) = input_vfilter {
+            write!(hint, " --input_vfilter {input_vfilter:?}").unwrap();
         }
         if let Some(filter) = vfilter {
             write!(hint, " --vfilter {filter:?}").unwrap();
@@ -271,8 +282,8 @@ impl Encode {
             ("-pix_fmt", " use --pix-format"),
             ("-crf", ""),
             ("-preset", " use --preset"),
-            ("-vf", " use --vfilter"),
-            ("-filter:v", " use --vfilter"),
+            ("-vf", " use --input_vfilter and --vfilter"),
+            ("-filter:v", " use --input_vfilter and --vfilter"),
         ]);
         for arg in args.iter().chain(input_args.iter()) {
             if let Some(hint) = reserved.get(arg.as_str()) {
@@ -284,6 +295,7 @@ impl Encode {
             input: &self.input,
             vcodec,
             pix_fmt,
+            input_vfilter: self.input_vfilter.as_deref(),
             vfilter: self.vfilter.as_deref(),
             crf,
             preset,
@@ -443,15 +455,16 @@ impl std::str::FromStr for KeyInterval {
 #[derive(clap::ValueEnum, Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[clap(rename_all = "lower")]
 pub enum PixelFormat {
+    None,
     Yuv420p,
     Yuv420p10le,
     Yuv444p10le,
-    None,
 }
 
 #[test]
 fn pixel_format_order() {
     use PixelFormat::*;
+    assert!(None < Yuv420p);
     assert!(Yuv420p < Yuv420p10le);
     assert!(Yuv420p10le < Yuv444p10le);
 }
@@ -531,6 +544,7 @@ fn svtav1_to_ffmpeg_args_default_over_3m() {
     let enc = Encode {
         encoder: Encoder("libsvtav1".into()),
         input: "vid.mp4".into(),
+        input_vfilter: None,
         vfilter: Some("scale=320:-1,fps=film".into()),
         preset: None,
         pix_format: None,
@@ -554,6 +568,7 @@ fn svtav1_to_ffmpeg_args_default_over_3m() {
     let FfmpegEncodeArgs {
         input,
         vcodec,
+        input_vfilter,
         vfilter,
         pix_fmt,
         crf,
@@ -596,6 +611,7 @@ fn svtav1_to_ffmpeg_args_default_under_3m() {
     let enc = Encode {
         encoder: Encoder("libsvtav1".into()),
         input: "vid.mp4".into(),
+        input_vfilter: None,
         vfilter: None,
         preset: Some(Preset::Number(7)),
         pix_format: Some(PixelFormat::Yuv420p),
@@ -619,6 +635,7 @@ fn svtav1_to_ffmpeg_args_default_under_3m() {
     let FfmpegEncodeArgs {
         input,
         vcodec,
+        input_vfilter,
         vfilter,
         pix_fmt,
         crf,

@@ -80,38 +80,20 @@ impl Vmaf {
         // * convert both streams to common pixel format
         // * scale to vmaf width if necessary
         // * sync presentation timestamp
-        if pix_fmt == PixelFormat::None {
-            let prefix = if let Some((w, h)) = self.vf_scale(model.unwrap_or_default(), distorted_res) {
-                format!(
-                    "[0:v]scale={w}:{h}:flags=bicubic,setpts=PTS-STARTPTS[dis];\
-                     [1:v]{ref_vf}scale={w}:{h}:flags=bicubic,setpts=PTS-STARTPTS[ref];[dis][ref]"
-                )
-            } else {
-                format!(
-                    "[0:v]setpts=PTS-STARTPTS[dis];\
-                     [1:v]{ref_vf}setpts=PTS-STARTPTS[ref];[dis][ref]"
-                )
-            };
-    
-            lavfi.insert_str(0, &prefix);
-            lavfi
-
+        let prefix = if let Some((w, h)) = self.vf_scale(model.unwrap_or_default(), distorted_res) {
+            format!(
+                "[0:v]format={pix_fmt},scale={w}:{h}:flags=bicubic,setpts=PTS-STARTPTS[dis];\
+                [1:v]format={pix_fmt},{ref_vf}scale={w}:{h}:flags=bicubic,setpts=PTS-STARTPTS[ref];[dis][ref]"
+            )
         } else {
-            let prefix = if let Some((w, h)) = self.vf_scale(model.unwrap_or_default(), distorted_res) {
-                format!(
-                    "[0:v]format={pix_fmt},scale={w}:{h}:flags=bicubic,setpts=PTS-STARTPTS[dis];\
-                     [1:v]format={pix_fmt},{ref_vf}scale={w}:{h}:flags=bicubic,setpts=PTS-STARTPTS[ref];[dis][ref]"
-                )
-            } else {
-                format!(
-                    "[0:v]format={pix_fmt},setpts=PTS-STARTPTS[dis];\
-                     [1:v]format={pix_fmt},{ref_vf}setpts=PTS-STARTPTS[ref];[dis][ref]"
-                )
-            };
-    
-            lavfi.insert_str(0, &prefix);
-            lavfi
-        }
+            format!(
+                "[0:v]format={pix_fmt},setpts=PTS-STARTPTS[dis];\
+                [1:v]format={pix_fmt},{ref_vf}setpts=PTS-STARTPTS[ref];[dis][ref]"
+            )
+        };
+
+        lavfi.insert_str(0, &prefix);
+        lavfi
     }
 
     fn vf_scale(&self, model: VmafModel, distorted_res: Option<(u32, u32)>) -> Option<(i32, i32)> {
