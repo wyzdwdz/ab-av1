@@ -446,7 +446,7 @@ pub enum PixelFormat {
     Yuv420p,
     Yuv420p10le,
     Yuv444p10le,
-    DrmPrime,
+    Drm_Prime,
 }
 
 #[test]
@@ -462,7 +462,7 @@ impl PixelFormat {
             Self::Yuv420p10le => "yuv420p10le",
             Self::Yuv444p10le => "yuv444p10le",
             Self::Yuv420p => "yuv420p",
-            Self::DrmPrime => "drm_prime",
+            Self::Drm_Prime => "drm_prime",
         }
     }
 }
@@ -481,7 +481,7 @@ impl TryFrom<&str> for PixelFormat {
             "yuv420p10le" => Ok(Self::Yuv420p10le),
             "yuv444p10le" => Ok(Self::Yuv444p10le),
             "yuv420p" => Ok(Self::Yuv420p),
-            "drm_prime" => Ok(Self::DrmPrime),
+            "drm_prime" => Ok(Self::Drm_Prime),
             _ => Err(()),
         }
     }
