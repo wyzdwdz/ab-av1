@@ -43,7 +43,7 @@ impl Vmaf {
     pub fn ffmpeg_lavfi(
         &self,
         distorted_res: Option<(u32, u32)>,
-        mut pix_fmt: PixelFormat,
+        pix_fmt: PixelFormat,
         ref_vfilter: Option<&str>,
     ) -> String {
         let mut args = self.vmaf_args.clone();
