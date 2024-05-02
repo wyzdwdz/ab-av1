@@ -93,7 +93,7 @@ pub fn encode_sample(
         (Some(s1), None) => Some(format!("{}", s1)),
         (None, Some(s2)) => Some(format!("{}", s2)),
         (None, None) => None,
-    }
+    };
 
     if pix_fmt == PixelFormat::None {
         let enc = Command::new("ffmpeg")
@@ -186,7 +186,7 @@ pub fn encode(
         (Some(s1), None) => Some(format!("{}", s1)),
         (None, Some(s2)) => Some(format!("{}", s2)),
         (None, None) => None,
-    }
+    };
 
     if pix_fmt == PixelFormat::None {
         let enc = Command::new("ffmpeg")
