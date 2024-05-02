@@ -85,27 +85,51 @@ pub fn encode_sample(
 
     temporary::add(&dest, TempKind::Keepable);
 
-    let enc = Command::new("ffmpeg")
-        .kill_on_drop(true)
-        .arg("-y")
-        .args(input_args.iter().map(|a| &**a))
-        .arg2("-i", input)
-        .arg2("-c:v", &*vcodec)
-        .args(output_args.iter().map(|a| &**a))
-        .arg2(vcodec.crf_arg(), crf)
-        .arg2("-pix_fmt", pix_fmt.as_str())
-        .arg2_opt(vcodec.preset_arg(), preset)
-        .arg2_opt("-vf", vfilter)
-        .arg("-an")
-        .arg(&dest)
-        .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::piped())
-        .spawn()
-        .context("ffmpeg encode_sample")?;
+    if pix_fmt == PixelFormat::None {
+        let enc = Command::new("ffmpeg")
+            .kill_on_drop(true)
+            .arg("-y")
+            .args(input_args.iter().map(|a| &**a))
+            .arg2("-i", input)
+            .arg2("-c:v", &*vcodec)
+            .args(output_args.iter().map(|a| &**a))
+            .arg2(vcodec.crf_arg(), crf)
+            .arg2_opt(vcodec.preset_arg(), preset)
+            .arg2_opt("-vf", vfilter)
+            .arg("-an")
+            .arg(&dest)
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::piped())
+            .spawn()
+            .context("ffmpeg encode_sample")?;
 
-    let stream = FfmpegOut::stream(enc, "ffmpeg encode_sample");
-    Ok((dest, stream))
+        let stream = FfmpegOut::stream(enc, "ffmpeg encode_sample");
+        Ok((dest, stream))
+
+    } else {
+        let enc = Command::new("ffmpeg")
+            .kill_on_drop(true)
+            .arg("-y")
+            .args(input_args.iter().map(|a| &**a))
+            .arg2("-i", input)
+            .arg2("-c:v", &*vcodec)
+            .args(output_args.iter().map(|a| &**a))
+            .arg2(vcodec.crf_arg(), crf)
+            .arg2("-pix_fmt", pix_fmt.as_str())
+            .arg2_opt(vcodec.preset_arg(), preset)
+            .arg2_opt("-vf", vfilter)
+            .arg("-an")
+            .arg(&dest)
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::piped())
+            .spawn()
+            .context("ffmpeg encode_sample")?;
+
+        let stream = FfmpegOut::stream(enc, "ffmpeg encode_sample");
+        Ok((dest, stream))
+    }
 }
 
 /// Encode to output.
@@ -146,33 +170,63 @@ pub fn encode(
         false => "0",
     };
 
-    let enc = Command::new("ffmpeg")
-        .kill_on_drop(true)
-        .args(input_args.iter().map(|a| &**a))
-        .arg("-y")
-        .arg2("-i", input)
-        .arg2("-map", map)
-        .arg2("-c:v", "copy")
-        .arg2("-c:v:0", &*vcodec)
-        .args(output_args.iter().map(|a| &**a))
-        .arg2(vcodec.crf_arg(), crf)
-        .arg2("-pix_fmt", pix_fmt.as_str())
-        .arg2_opt(vcodec.preset_arg(), preset)
-        .arg2_opt("-vf", vfilter)
-        .arg2("-c:s", "copy")
-        .arg2("-c:a", audio_codec)
-        .arg2_if(downmix_to_stereo, "-ac", 2)
-        .arg2_if(set_ba_128k, "-b:a", "128k")
-        .arg2_if(add_faststart, "-movflags", "+faststart")
-        .arg2_if(add_cues_to_front, "-cues_to_front", "y")
-        .arg(output)
-        .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::piped())
-        .spawn()
-        .context("ffmpeg encode")?;
+    if pix_fmt == PixelFormat::None {
+        let enc = Command::new("ffmpeg")
+            .kill_on_drop(true)
+            .args(input_args.iter().map(|a| &**a))
+            .arg("-y")
+            .arg2("-i", input)
+            .arg2("-map", map)
+            .arg2("-c:v", "copy")
+            .arg2("-c:v:0", &*vcodec)
+            .args(output_args.iter().map(|a| &**a))
+            .arg2(vcodec.crf_arg(), crf)
+            .arg2_opt(vcodec.preset_arg(), preset)
+            .arg2_opt("-vf", vfilter)
+            .arg2("-c:s", "copy")
+            .arg2("-c:a", audio_codec)
+            .arg2_if(downmix_to_stereo, "-ac", 2)
+            .arg2_if(set_ba_128k, "-b:a", "128k")
+            .arg2_if(add_faststart, "-movflags", "+faststart")
+            .arg2_if(add_cues_to_front, "-cues_to_front", "y")
+            .arg(output)
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::piped())
+            .spawn()
+            .context("ffmpeg encode")?;
 
-    Ok(FfmpegOut::stream(enc, "ffmpeg encode"))
+        Ok(FfmpegOut::stream(enc, "ffmpeg encode"))
+
+    } else {
+        let enc = Command::new("ffmpeg")
+            .kill_on_drop(true)
+            .args(input_args.iter().map(|a| &**a))
+            .arg("-y")
+            .arg2("-i", input)
+            .arg2("-map", map)
+            .arg2("-c:v", "copy")
+            .arg2("-c:v:0", &*vcodec)
+            .args(output_args.iter().map(|a| &**a))
+            .arg2(vcodec.crf_arg(), crf)
+            .arg2("-pix_fmt", pix_fmt.as_str())
+            .arg2_opt(vcodec.preset_arg(), preset)
+            .arg2_opt("-vf", vfilter)
+            .arg2("-c:s", "copy")
+            .arg2("-c:a", audio_codec)
+            .arg2_if(downmix_to_stereo, "-ac", 2)
+            .arg2_if(set_ba_128k, "-b:a", "128k")
+            .arg2_if(add_faststart, "-movflags", "+faststart")
+            .arg2_if(add_cues_to_front, "-cues_to_front", "y")
+            .arg(output)
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::piped())
+            .spawn()
+            .context("ffmpeg encode")?;
+
+        Ok(FfmpegOut::stream(enc, "ffmpeg encode"))
+    }
 }
 
 pub fn pre_extension_name(vcodec: &str) -> &str {

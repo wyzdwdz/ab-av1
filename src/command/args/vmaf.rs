@@ -46,7 +46,7 @@ impl Vmaf {
         mut pix_fmt: PixelFormat,
         ref_vfilter: Option<&str>,
     ) -> String {
-        if pix_fmt == PixelFormat::DrmPrime {
+        if pix_fmt == PixelFormat::None {
             pix_fmt = PixelFormat::Yuv444p10le;
         }
 
