@@ -83,12 +83,12 @@ impl Vmaf {
         let prefix = if let Some((w, h)) = self.vf_scale(model.unwrap_or_default(), distorted_res) {
             format!(
                 "[0:v]format={pix_fmt},scale={w}:{h}:flags=bicubic,setpts=PTS-STARTPTS[dis];\
-                [1:v]format={pix_fmt},{ref_vf}scale={w}:{h}:flags=bicubic,setpts=PTS-STARTPTS[ref];[dis][ref]"
+                [1:v]{ref_vf},format={pix_fmt},scale={w}:{h}:flags=bicubic,setpts=PTS-STARTPTS[ref];[dis][ref]"
             )
         } else {
             format!(
                 "[0:v]format={pix_fmt},setpts=PTS-STARTPTS[dis];\
-                [1:v]format={pix_fmt},{ref_vf}setpts=PTS-STARTPTS[ref];[dis][ref]"
+                [1:v]{ref_vf},format={pix_fmt},setpts=PTS-STARTPTS[ref];[dis][ref]"
             )
         };
 
