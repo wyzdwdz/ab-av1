@@ -34,6 +34,14 @@ pub struct Encode {
     #[arg(long)]
     pub input_vfilter: Option<String>,
 
+    /// Ffmpeg video filter applied to the output before av1 encoding.
+    /// Caution! This filter will not be applied in VMAF.
+    /// E.g. --output-vfilter "scale=1280:-1,fps=24".
+    ///
+    /// See https://ffmpeg.org/ffmpeg-filters.html#Video-Filters
+    #[arg(long)]
+    pub output_vfilter: Option<String>,
+
     /// Ffmpeg video filter applied to the input before av1 encoding.
     /// Caution! This filter will be applied in VMAF.
     /// E.g. --vfilter "scale=1280:-1,fps=24".
@@ -131,6 +139,7 @@ impl Encode {
             encoder,
             input,
             input_vfilter,
+            output_vfilter,
             vfilter,
             preset,
             pix_format,
@@ -165,6 +174,9 @@ impl Encode {
         }
         if let Some(input_vfilter) = input_vfilter {
             write!(hint, " --input-vfilter {input_vfilter:?}").unwrap();
+        }
+        if let Some(output_vfilter) = output_vfilter {
+            write!(hint, " --output-vfilter {output_vfilter:?}").unwrap();
         }
         if let Some(filter) = vfilter {
             write!(hint, " --vfilter {filter:?}").unwrap();
@@ -284,8 +296,8 @@ impl Encode {
             ("-pix_fmt", " use --pix-format"),
             ("-crf", ""),
             ("-preset", " use --preset"),
-            ("-vf", " use --input_vfilter and --vfilter"),
-            ("-filter:v", " use --input_vfilter and --vfilter"),
+            ("-vf", " use --input_vfilter, --output_vfilter and --vfilter"),
+            ("-filter:v", " use --input_vfilter, --output_vfilter and --vfilter")
         ]);
         for arg in args.iter().chain(input_args.iter()) {
             if let Some(hint) = reserved.get(arg.as_str()) {
@@ -298,6 +310,7 @@ impl Encode {
             vcodec,
             pix_fmt,
             input_vfilter: self.input_vfilter.as_deref(),
+            output_vfilter: self.output_vfilter.as_deref(),
             vfilter: self.vfilter.as_deref(),
             crf,
             preset,
@@ -547,6 +560,7 @@ fn svtav1_to_ffmpeg_args_default_over_3m() {
         encoder: Encoder("libsvtav1".into()),
         input: "vid.mp4".into(),
         input_vfilter: None,
+        output_vfilter: None,
         vfilter: Some("scale=320:-1,fps=film".into()),
         preset: None,
         pix_format: None,
@@ -571,6 +585,7 @@ fn svtav1_to_ffmpeg_args_default_over_3m() {
         input,
         vcodec,
         input_vfilter,
+        output_vfilter,
         vfilter,
         pix_fmt,
         crf,
@@ -614,6 +629,7 @@ fn svtav1_to_ffmpeg_args_default_under_3m() {
         encoder: Encoder("libsvtav1".into()),
         input: "vid.mp4".into(),
         input_vfilter: None,
+        output_vfilter: None,
         vfilter: None,
         preset: Some(Preset::Number(7)),
         pix_format: Some(PixelFormat::Yuv420p),
@@ -638,6 +654,7 @@ fn svtav1_to_ffmpeg_args_default_under_3m() {
         input,
         vcodec,
         input_vfilter,
+        output_vfilter,
         vfilter,
         pix_fmt,
         crf,

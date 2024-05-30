@@ -22,6 +22,7 @@ pub struct FfmpegEncodeArgs<'a> {
     pub input: &'a Path,
     pub vcodec: Arc<str>,
     pub input_vfilter: Option<&'a str>,
+    pub output_vfilter: Option<&'a str>,
     pub vfilter: Option<&'a str>,
     pub pix_fmt: PixelFormat,
     pub crf: f32,
@@ -50,6 +51,7 @@ impl FfmpegEncodeArgs<'_> {
         // input not relevant to sample encoding
         self.vcodec.hash(state);
         self.input_vfilter.hash(state);
+        self.output_vfilter.hash(state);
         self.vfilter.hash(state);
         self.pix_fmt.hash(state);
         self.crf.to_bits().hash(state);
@@ -65,6 +67,7 @@ pub fn encode_sample(
         input,
         vcodec,
         input_vfilter,
+        output_vfilter,
         vfilter,
         pix_fmt,
         crf,
@@ -88,11 +91,15 @@ pub fn encode_sample(
 
     temporary::add(&dest, TempKind::Keepable);
 
-    let vf = match (input_vfilter, vfilter) {
-        (Some(s1), Some(s2)) => Some(format!("{},{}", s1, s2)),
-        (Some(s1), None) => Some(format!("{}", s1)),
-        (None, Some(s2)) => Some(format!("{}", s2)),
-        (None, None) => None,
+    let vf = match (input_vfilter, vfilter, output_vfilter) {
+        (Some(s1), Some(s2), Some(s3)) => Some(format!("{},{},{}", s1, s2, s3)),
+        (Some(s1), Some(s2), None) => Some(format!("{},{}", s1, s2)),
+        (Some(s1), None, Some(s3)) => Some(format!("{},{}", s1, s3)),
+        (Some(s1), None, None) => Some(format!("{}", s1)),
+        (None, Some(s2), Some(s3)) => Some(format!("{},{}", s2, s3)),
+        (None, Some(s2), None) => Some(format!("{}", s2)),
+        (None, None, Some(s3)) => Some(format!("{}", s3)),
+        (None, None, None) => None,
     };
 
     if pix_fmt == PixelFormat::None {
@@ -148,6 +155,7 @@ pub fn encode(
         input,
         vcodec,
         input_vfilter,
+        output_vfilter,
         vfilter,
         pix_fmt,
         crf,
@@ -181,11 +189,15 @@ pub fn encode(
         false => "0",
     };
 
-    let vf = match (input_vfilter, vfilter) {
-        (Some(s1), Some(s2)) => Some(format!("{},{}", s1, s2)),
-        (Some(s1), None) => Some(format!("{}", s1)),
-        (None, Some(s2)) => Some(format!("{}", s2)),
-        (None, None) => None,
+    let vf = match (input_vfilter, vfilter, output_vfilter) {
+        (Some(s1), Some(s2), Some(s3)) => Some(format!("{},{},{}", s1, s2, s3)),
+        (Some(s1), Some(s2), None) => Some(format!("{},{}", s1, s2)),
+        (Some(s1), None, Some(s3)) => Some(format!("{},{}", s1, s3)),
+        (Some(s1), None, None) => Some(format!("{}", s1)),
+        (None, Some(s2), Some(s3)) => Some(format!("{},{}", s2, s3)),
+        (None, Some(s2), None) => Some(format!("{}", s2)),
+        (None, None, Some(s3)) => Some(format!("{}", s3)),
+        (None, None, None) => None,
     };
 
     if pix_fmt == PixelFormat::None {
